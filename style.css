@@ -149,3 +149,13 @@ html, body {
   font-weight: 400;
   padding-left: 20px;
 }
+
+.ymaps3x0--controls_vertical {
+  align-items: center !important;
+}
+
+.block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
