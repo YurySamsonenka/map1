@@ -50,6 +50,7 @@ function updateCamera(delta_tilt_deg, delta_azimuth_deg) {
   });
 }
 
+// Управление камерой
 document.getElementById("tiltUp").onclick = () => updateCamera(-5, 0);
 document.getElementById("tiltDown").onclick = () => updateCamera(5, 0);
 document.getElementById("rotateLeft").onclick = () => updateCamera(0, -10);
@@ -64,3 +65,43 @@ document.getElementById("reset").onclick = () => {
     }
   });
 };
+
+// Управление боковой панелью
+const sidebar = document.getElementById("sidebar");
+const sidebarTrigger = document.getElementById("sidebar-trigger");
+const closeSidebar = document.getElementById("close-sidebar");
+
+sidebarTrigger.onclick = () => {
+  sidebar.classList.add("open");
+  sidebarTrigger.classList.add("hidden");
+  // Загружаем данные при открытии панели
+  loadDataFromServer();
+};
+
+closeSidebar.onclick = () => {
+  sidebar.classList.remove("open");
+  sidebarTrigger.classList.remove("hidden");
+};
+
+// Закрытие панели при клике вне её
+document.addEventListener("click", (e) => {
+  if (sidebar.classList.contains("open") &&
+    !sidebar.contains(e.target) &&
+    !sidebarTrigger.contains(e.target)) {
+    sidebar.classList.remove("open");
+    sidebarTrigger.classList.remove("hidden");
+  }
+});
+
+// Функция для обновления данных (можно вызывать из других частей кода)
+function updatePanelData(name, number) {
+  document.getElementById("name-value").textContent = name;
+  document.getElementById("number-value").textContent = number;
+}
+
+// Имитация ответа от сервера (для тестирования - удалите в продакшене)
+function loadDataFromServer() {
+  setTimeout(() => {
+    updatePanelData("Объект 1", "12345");
+  }, 500);
+}

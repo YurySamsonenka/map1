@@ -9,6 +9,31 @@
   </head>
   <body>
     <div id="map"></div>
+
+    <!-- Квадратик с цифрой 1 -->
+    <div id="sidebar-trigger" class="sidebar-trigger">1</div>
+
+    <!-- Выдвижная панель -->
+    <div id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h3>Информация</h3>
+        <button id="close-sidebar" class="close-btn">&times;</button>
+      </div>
+      <div class="sidebar-content">
+        <table class="info-table">
+          <tr>
+            <td class="label">Имя:</td>
+            <td class="value" id="name-value">Загрузка...</td>
+          </tr>
+          <tr>
+            <td class="label">Число:</td>
+            <td class="value" id="number-value">Загрузка...</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Управление камерой -->
     <div id="controls">
       <button id="tiltUp">Tilt +</button>
       <button id="tiltDown">Tilt −</button>
