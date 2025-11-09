@@ -1,99 +1,184 @@
-ymaps3.ready.then(() => {
-  ymaps3.import.registerCdn(
-    'https://cdn.jsdelivr.net/npm/{package}',
-    ['@yandex/ymaps3-default-ui-theme@0.0.7']
-  );
-});
-
-await ymaps3.ready;
-
-const {
-  YMap,
-  YMapDefaultSchemeLayer,
-  YMapDefaultFeaturesLayer,
-  YMapMarker,
-  YMapControls,
-  YMapControlButton
-} = ymaps3;
-
-const { YMapRotateTiltControl } = await ymaps3.import('@yandex/ymaps3-default-ui-theme');
-
-const center_coords = [37.617644, 55.755819];
 const deg_to_rad = Math.PI / 180;
 
-const map = new YMap(document.getElementById("map"), {
-  location: { center: center_coords, zoom: 17 },
-  mode: "vector",
-  behaviors: ["drag", "scrollZoom", "dblClick", "mouseTilt", "mouseRotate"]
-});
+// Основная точка центра (заполнится после первого запроса)
+let center_coords = null;
 
-map.addChild(new YMapDefaultSchemeLayer());
-map.addChild(new YMapDefaultFeaturesLayer());
+async function getInitialCoordinates() {
+  try {
+    const response = await fetch('https://enteneller.ru/moscow_car/api/sensors/get/');
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-const marker = new YMapMarker({ coordinates: center_coords }, document.createTextNode("🚗"));
-map.addChild(marker);
+    const data = await response.json();
+    const lon = parseFloat(data.find((i) => i.field === 'longitude')?.value);
+    const lat = parseFloat(data.find((i) => i.field === 'latitude')?.value);
 
-const svg = document.createElement("div");
-svg.classList.add('block')
-svg.innerHTML = `
-  <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.385 12.42l16.01-7.614a.6.6 0 0 1 .8.8l-7.616 16.009a.6.6 0 0 1-1.11-.068l-2.005-6.012-6.01-2.003a.6.6 0 0 1-.069-1.111z" fill="currentColor"></path></svg>
-`;
+    if (!lon || !lat) throw new Error('Нет координат в ответе API');
 
-const focusButton = new YMapControlButton({
-  title: "Центрировать",
-  element: svg,
-  onClick: () => {
+    return [lon, lat];
+  } catch (error) {
+    console.error('Ошибка при первичной загрузке координат:', error);
+    // fallback – Москва центр
+    return [37.617644, 55.755819];
+  }
+}
+
+(async () => {
+  center_coords = await getInitialCoordinates();
+
+  await ymaps3.ready;
+
+  ymaps3.import.registerCdn('https://cdn.jsdelivr.net/npm/{package}', ['@yandex/ymaps3-default-ui-theme@0.0.7']);
+
+  const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker, YMapControls } = ymaps3;
+
+  const { YMapRotateTiltControl } = await ymaps3.import('@yandex/ymaps3-default-ui-theme');
+
+  // Инициализация карты по координатам из API
+  const map = new YMap(document.getElementById('map'), {
+    location: { center: center_coords, zoom: 17 },
+    mode: 'vector',
+    behaviors: ['drag', 'scrollZoom', 'dblClick', 'mouseTilt', 'mouseRotate']
+  });
+
+  map.addChild(new YMapDefaultSchemeLayer());
+  map.addChild(new YMapDefaultFeaturesLayer());
+
+  // Маркер
+  const markerElement = document.createElement('div');
+  markerElement.className = 'car-marker';
+  const carIcon = document.createElement('img');
+  carIcon.src = '49568490-4ac8-474e-b8ba-35137d30d9e2.png';
+  carIcon.alt = 'car marker';
+  carIcon.style.width = '41px';
+  carIcon.style.height = '41px';
+  markerElement.appendChild(carIcon);
+
+  const marker = new YMapMarker({ coordinates: center_coords }, markerElement);
+  map.addChild(marker);
+
+  // Контролы
+  const controls = new YMapControls({ position: 'right' });
+  controls.addChild(new YMapRotateTiltControl({}));
+  map.addChild(controls);
+
+  // Камера
+  map.update({
+    camera: {
+      tilt: 45 * deg_to_rad,
+      azimuth: 30 * deg_to_rad
+    }
+  });
+
+  // --- Панель управления ---
+  const sidebar = document.getElementById('sidebar');
+  const sidebarTrigger = document.getElementById('sidebar-trigger');
+  const closeSidebar = document.getElementById('close-sidebar');
+  const findCarBtn = document.getElementById('find-car-btn');
+
+  sidebarTrigger.onclick = () => {
+    sidebar.classList.add('open');
+    sidebarTrigger.classList.add('hidden');
+    loadDataFromServer();
+  };
+
+  closeSidebar.onclick = () => {
+    sidebar.classList.remove('open');
+    sidebarTrigger.classList.remove('hidden');
+  };
+
+  findCarBtn.onclick = () => {
     map.update({
       location: { center: center_coords, duration: 600 }
     });
+  };
+
+  document.addEventListener('click', (e) => {
+    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !sidebarTrigger.contains(e.target)) {
+      sidebar.classList.remove('open');
+      sidebarTrigger.classList.remove('hidden');
+    }
+  });
+
+  // --- Обновление панели ---
+  function updatePanelData(data) {
+    const tableBody = document.querySelector('.info-table');
+    tableBody.innerHTML = '';
+
+    data.forEach((item) => {
+      if (item.field !== 'longitude' && item.field !== 'latitude') {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="label">${item.name}:</td>
+          <td class="value">${item.value}</td>
+        `;
+        tableBody.appendChild(row);
+      }
+    });
   }
-});
 
-const controls = new YMapControls({ position: "right" });
-controls.addChild(focusButton);
-controls.addChild(new YMapRotateTiltControl({}));
-map.addChild(controls);
+  // --- Анимация маркера ---
+  let animating = false;
 
-map.update({
-  camera: {
-    tilt: 45 * deg_to_rad,
-    azimuth: 30 * deg_to_rad
+  function animateMarkerTo(lon, lat) {
+    const [startLon, startLat] = center_coords;
+    const [endLon, endLat] = [lon, lat];
+    const duration = 900;
+    const startTime = performance.now();
+
+    function step(currentTime) {
+      const t = Math.min((currentTime - startTime) / duration, 1);
+      // ease in-out
+      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+      const newLon = startLon + (endLon - startLon) * ease;
+      const newLat = startLat + (endLat - startLat) * ease;
+
+      marker.update({ coordinates: [newLon, newLat] });
+
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        center_coords = [endLon, endLat];
+        animating = false;
+      }
+    }
+
+    if (!animating) {
+      animating = true;
+      requestAnimationFrame(step);
+    }
   }
-});
 
-const sidebar = document.getElementById("sidebar");
-const sidebarTrigger = document.getElementById("sidebar-trigger");
-const closeSidebar = document.getElementById("close-sidebar");
+  // --- Обновление данных ---
+  async function loadDataFromServer() {
+    try {
+      const response = await fetch('https://enteneller.ru/moscow_car/api/sensors/get/');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-sidebarTrigger.onclick = () => {
-  sidebar.classList.add("open");
-  sidebarTrigger.classList.add("hidden");
+      const data = await response.json();
+
+      const lon = parseFloat(data.find((i) => i.field === 'longitude')?.value);
+      const lat = parseFloat(data.find((i) => i.field === 'latitude')?.value);
+
+      console.log(lon, lat);
+
+      if (lon && lat) {
+        if (Math.abs(lon - center_coords[0]) > 0.000001 || Math.abs(lat - center_coords[1]) > 0.000001) {
+          animateMarkerTo(lon, lat);
+        }
+      }
+
+      if (sidebar.classList.contains('open')) updatePanelData(data);
+    } catch (err) {
+      console.error('Ошибка при обновлении:', err);
+      if (sidebar.classList.contains('open')) {
+        document.querySelector('.info-table').innerHTML = `
+          <tr><td colspan="2" style="text-align:center;color:red;">Ошибка загрузки данных</td></tr>
+        `;
+      }
+    }
+  }
+
   loadDataFromServer();
-};
-
-closeSidebar.onclick = () => {
-  sidebar.classList.remove("open");
-  sidebarTrigger.classList.remove("hidden");
-};
-
-document.addEventListener("click", (e) => {
-  if (
-    sidebar.classList.contains("open") &&
-    !sidebar.contains(e.target) &&
-    !sidebarTrigger.contains(e.target)
-  ) {
-    sidebar.classList.remove("open");
-    sidebarTrigger.classList.remove("hidden");
-  }
-});
-
-function updatePanelData(name, number) {
-  document.getElementById("name-value").textContent = name;
-  document.getElementById("number-value").textContent = number;
-}
-
-function loadDataFromServer() {
-  setTimeout(() => {
-    updatePanelData("Объект 1", "12345");
-  }, 500);
-}
+  setInterval(loadDataFromServer, 1000);
+})();
