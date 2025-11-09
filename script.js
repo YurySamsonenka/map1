@@ -34,7 +34,16 @@ async function getInitialCoordinates() {
   const map = new YMap(document.getElementById('map'), {
     location: { center: center_coords, zoom: 17 },
     mode: 'vector',
-    behaviors: ['drag', 'scrollZoom', 'dblClick', 'mouseTilt', 'mouseRotate']
+    behaviors: [
+      'drag', // Перетаскивание мышью
+      'scrollZoom', // Зум колесом мыши
+      'dblClick', // Двойной клик для зума
+      'mouseTilt', // Наклон карты мышью
+      'mouseRotate', // Вращение карты мышью
+      'pinchRotate', // Вращение карты двумя пальцами на тач-устройствах
+      'pinchZoom', // Зум двумя пальцами на тач-устройствах
+      'panTilt' // Наклон карты на тач-устройствах (свайп двумя пальцами вверх/вниз)
+    ]
   });
 
   map.addChild(new YMapDefaultSchemeLayer());
