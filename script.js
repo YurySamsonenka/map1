@@ -49,7 +49,26 @@ async function getInitialCoordinates() {
   carIcon.style.height = '41px';
   carIcon.style.cursor = 'pointer';
   carIcon.style.transition = 'transform 0.2s';
+  carIcon.style.transform = 'translate(-20px, -20px)';
   markerElement.appendChild(carIcon);
+
+  carIcon.style.transition = 'transform 0.15s ease, filter 0.15s ease';
+  carIcon.style.transform = 'translate(-20px, -20px) scale(1)';
+
+  carIcon.addEventListener('mousedown', () => {
+    carIcon.style.transform = 'translate(-20px, -20px) scale(0.9)';
+    carIcon.style.filter = 'brightness(0.8)';
+  });
+
+  carIcon.addEventListener('mouseup', () => {
+    carIcon.style.transform = 'translate(-20px, -20px) scale(1)';
+    carIcon.style.filter = 'brightness(1)';
+  });
+
+  carIcon.addEventListener('mouseleave', () => {
+    carIcon.style.transform = 'translate(-20px, -20px) scale(1)';
+    carIcon.style.filter = 'brightness(1)';
+  });
 
   markerElement.addEventListener('click', (e) => {
     e.stopPropagation();
