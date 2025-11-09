@@ -13,7 +13,6 @@ html, body {
   height: 100%;
 }
 
-/* Квадратик с цифрой 1 */
 .sidebar-trigger {
   font-size: 24px;
   font-weight: 600;
@@ -46,7 +45,6 @@ html, body {
   transform: translateY(-50%) scale(0.98);
 }
 
-/* Боковая панель */
 .sidebar {
   position: absolute;
   z-index: 300;
@@ -131,7 +129,6 @@ html, body {
   background: white;
 }
 
-/* Подвал боковой панели с кнопкой */
 .sidebar-footer {
   flex-shrink: 0;
   padding: 20px 28px 24px;
@@ -165,7 +162,6 @@ html, body {
   flex-shrink: 0;
 }
 
-/* Таблица */
 .info-table {
   width: 100%;
   border-spacing: 0;
@@ -224,7 +220,6 @@ html, body {
   justify-content: center;
 }
 
-/* Hover эффекты только для устройств с поддержкой hover */
 @media (hover: hover) and (pointer: fine) {
   .sidebar-trigger:hover {
     transform: translateY(-50%) scale(1.05);

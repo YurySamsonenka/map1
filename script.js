@@ -1,6 +1,5 @@
 const deg_to_rad = Math.PI / 180;
 
-// Основная точка центра (заполнится после первого запроса)
 let center_coords = null;
 
 async function getInitialCoordinates() {
@@ -17,7 +16,6 @@ async function getInitialCoordinates() {
     return [lon, lat];
   } catch (error) {
     console.error('Ошибка при первичной загрузке координат:', error);
-    // fallback – Москва центр
     return [37.617644, 55.755819];
   }
 }
@@ -33,7 +31,6 @@ async function getInitialCoordinates() {
 
   const { YMapRotateTiltControl } = await ymaps3.import('@yandex/ymaps3-default-ui-theme');
 
-  // Инициализация карты по координатам из API
   const map = new YMap(document.getElementById('map'), {
     location: { center: center_coords, zoom: 17 },
     mode: 'vector',
@@ -69,7 +66,6 @@ async function getInitialCoordinates() {
     }
   });
 
-  // --- Панель управления ---
   const sidebar = document.getElementById('sidebar');
   const sidebarTrigger = document.getElementById('sidebar-trigger');
   const closeSidebar = document.getElementById('close-sidebar');
@@ -99,7 +95,6 @@ async function getInitialCoordinates() {
     }
   });
 
-  // --- Обновление панели ---
   function updatePanelData(data) {
     const tableBody = document.querySelector('.info-table');
     tableBody.innerHTML = '';
@@ -116,7 +111,6 @@ async function getInitialCoordinates() {
     });
   }
 
-  // --- Анимация маркера ---
   let animating = false;
 
   function animateMarkerTo(lon, lat) {
@@ -127,7 +121,6 @@ async function getInitialCoordinates() {
 
     function step(currentTime) {
       const t = Math.min((currentTime - startTime) / duration, 1);
-      // ease in-out
       const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
       const newLon = startLon + (endLon - startLon) * ease;
@@ -149,7 +142,6 @@ async function getInitialCoordinates() {
     }
   }
 
-  // --- Обновление данных ---
   async function loadDataFromServer() {
     try {
       const response = await fetch('https://enteneller.ru/moscow_car/api/sensors/get/');
