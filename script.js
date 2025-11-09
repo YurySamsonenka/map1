@@ -40,7 +40,6 @@ async function getInitialCoordinates() {
   map.addChild(new YMapDefaultSchemeLayer());
   map.addChild(new YMapDefaultFeaturesLayer());
 
-  // Маркер
   const markerElement = document.createElement('div');
   markerElement.className = 'car-marker';
   const carIcon = document.createElement('img');
@@ -48,17 +47,22 @@ async function getInitialCoordinates() {
   carIcon.alt = 'car marker';
   carIcon.style.width = '41px';
   carIcon.style.height = '41px';
+  carIcon.style.cursor = 'pointer';
+  carIcon.style.transition = 'transform 0.2s';
   markerElement.appendChild(carIcon);
+
+  markerElement.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openSidebar();
+  });
 
   const marker = new YMapMarker({ coordinates: center_coords }, markerElement);
   map.addChild(marker);
 
-  // Контролы
   const controls = new YMapControls({ position: 'right' });
   controls.addChild(new YMapRotateTiltControl({}));
   map.addChild(controls);
 
-  // Камера
   map.update({
     camera: {
       tilt: 45 * deg_to_rad,
@@ -71,10 +75,14 @@ async function getInitialCoordinates() {
   const closeSidebar = document.getElementById('close-sidebar');
   const findCarBtn = document.getElementById('find-car-btn');
 
-  sidebarTrigger.onclick = () => {
+  function openSidebar() {
     sidebar.classList.add('open');
     sidebarTrigger.classList.add('hidden');
     loadDataFromServer();
+  }
+
+  sidebarTrigger.onclick = () => {
+    openSidebar();
   };
 
   closeSidebar.onclick = () => {
