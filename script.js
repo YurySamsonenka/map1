@@ -42,37 +42,43 @@ async function getInitialCoordinates() {
 
   const markerElement = document.createElement('div');
   markerElement.className = 'car-marker';
+
+  const markerCircle = document.createElement('div');
+  markerCircle.className = 'marker-circle';
+
   const carIcon = document.createElement('img');
   carIcon.src = '49568490-4ac8-474e-b8ba-35137d30d9e2.png';
   carIcon.alt = 'car marker';
-  carIcon.style.width = '41px';
-  carIcon.style.height = '41px';
-  carIcon.style.cursor = 'pointer';
-  carIcon.style.transition = 'transform 0.2s';
-  carIcon.style.transform = 'translate(-20px, -20px)';
+  carIcon.className = 'car-icon';
+
+  markerElement.appendChild(markerCircle);
   markerElement.appendChild(carIcon);
 
-  carIcon.style.transition = 'transform 0.15s ease, filter 0.15s ease';
-  carIcon.style.transform = 'translate(-20px, -20px) scale(1)';
+  const sidebar = document.getElementById('sidebar');
+  const sidebarTrigger = document.getElementById('sidebar-trigger');
+  const closeSidebar = document.getElementById('close-sidebar');
+  const findCarBtn = document.getElementById('find-car-btn');
 
-  carIcon.addEventListener('mousedown', () => {
-    carIcon.style.transform = 'translate(-20px, -20px) scale(0.9)';
-    carIcon.style.filter = 'brightness(0.8)';
-  });
+  function openSidebar() {
+    sidebar.classList.add('open');
+    sidebarTrigger.classList.add('hidden');
+    markerCircle.classList.add('active');
+    loadDataFromServer();
+  }
 
-  carIcon.addEventListener('mouseup', () => {
-    carIcon.style.transform = 'translate(-20px, -20px) scale(1)';
-    carIcon.style.filter = 'brightness(1)';
-  });
-
-  carIcon.addEventListener('mouseleave', () => {
-    carIcon.style.transform = 'translate(-20px, -20px) scale(1)';
-    carIcon.style.filter = 'brightness(1)';
-  });
+  function closeSidebarFunc() {
+    sidebar.classList.remove('open');
+    sidebarTrigger.classList.remove('hidden');
+    markerCircle.classList.remove('active');
+  }
 
   markerElement.addEventListener('click', (e) => {
     e.stopPropagation();
-    openSidebar();
+    if (sidebar.classList.contains('open')) {
+      closeSidebarFunc();
+    } else {
+      openSidebar();
+    }
   });
 
   const marker = new YMapMarker({ coordinates: center_coords }, markerElement);
@@ -89,24 +95,12 @@ async function getInitialCoordinates() {
     }
   });
 
-  const sidebar = document.getElementById('sidebar');
-  const sidebarTrigger = document.getElementById('sidebar-trigger');
-  const closeSidebar = document.getElementById('close-sidebar');
-  const findCarBtn = document.getElementById('find-car-btn');
-
-  function openSidebar() {
-    sidebar.classList.add('open');
-    sidebarTrigger.classList.add('hidden');
-    loadDataFromServer();
-  }
-
   sidebarTrigger.onclick = () => {
     openSidebar();
   };
 
   closeSidebar.onclick = () => {
-    sidebar.classList.remove('open');
-    sidebarTrigger.classList.remove('hidden');
+    closeSidebarFunc();
   };
 
   findCarBtn.onclick = () => {
@@ -114,13 +108,6 @@ async function getInitialCoordinates() {
       location: { center: center_coords, duration: 600 }
     });
   };
-
-  document.addEventListener('click', (e) => {
-    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !sidebarTrigger.contains(e.target)) {
-      sidebar.classList.remove('open');
-      sidebarTrigger.classList.remove('hidden');
-    }
-  });
 
   function updatePanelData(data) {
     const tableBody = document.querySelector('.info-table');
