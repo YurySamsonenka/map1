@@ -1,11 +1,11 @@
-
 html, body {
-  margin: 0;
-  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #map {
@@ -15,36 +15,31 @@ html, body {
 
 /* Квадратик с цифрой 1 */
 .sidebar-trigger {
+  font-size: 24px;
+  font-weight: 600;
   position: absolute;
+  z-index: 200;
   top: 10%;
   left: 10px;
-  transform: translateY(-50%);
-  width: 56px;
-  height: 56px;
-  background: white;
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  font-weight: 600;
+  width: 56px;
+  height: 56px;
   cursor: pointer;
-  z-index: 200;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s, box-shadow 0.2s, opacity 0.4s ease-in-out;
-  color: #333;
+  transform: translateY(-50%);
   opacity: 1;
+  color: #333;
+  border: none;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar-trigger.hidden {
-  opacity: 0;
   pointer-events: none;
-}
-
-.sidebar-trigger:hover {
-  transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+  opacity: 0;
 }
 
 .sidebar-trigger:active {
@@ -54,62 +49,75 @@ html, body {
 /* Боковая панель */
 .sidebar {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 95%;
-  left: -500px;
-  width: 460px;
-  background: white;
   z-index: 300;
+  top: 20px;
+  left: -500px;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  width: 460px;
+  height: 55%;
   transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 24px;
+  background: white;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 .sidebar.open {
   left: 10px;
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    left: 20px;
+    width: auto;
+    height: 40%;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-150%);
+    border-radius: 20px;
+  }
+
+  .sidebar.open {
+    left: 20px;
+    transform: translateX(0);
+  }
+}
+
 .sidebar-header {
-  background: white;
-  padding: 24px 28px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
+  justify-content: space-between;
+  padding: 24px 28px;
   border-bottom: 1px solid #f0f0f0;
+  background: white;
 }
 
 .sidebar-header h3 {
-  margin: 0;
   font-size: 22px;
   font-weight: 600;
+  margin: 0;
   color: #333;
 }
 
 .close-btn {
-  background: #f5f5f5;
-  border: none;
   font-size: 24px;
-  cursor: pointer;
-  color: #999;
   line-height: 1;
-  padding: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  cursor: pointer;
   transition: background 0.2s, color 0.2s;
-}
-
-.close-btn:hover {
-  background: #e8e8e8;
-  color: #666;
+  color: #999;
+  border: none;
+  border-radius: 50%;
+  background: #f5f5f5;
 }
 
 .close-btn:active {
@@ -117,41 +125,36 @@ html, body {
 }
 
 .sidebar-content {
-  background: white;
-  padding: 0 28px 24px;
   overflow-y: auto;
   flex: 1;
+  padding: 0 28px 0;
+  background: white;
 }
 
 /* Подвал боковой панели с кнопкой */
 .sidebar-footer {
-  background: white;
+  flex-shrink: 0;
   padding: 20px 28px 24px;
   border-top: 1px solid #f0f0f0;
-  flex-shrink: 0;
+  background: white;
 }
 
 .find-car-btn {
-  width: 100%;
-  padding: 16px 24px;
-  background: #4A90E2;
-  color: white;
-  border: none;
-  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  cursor: pointer;
   transition: background 0.2s, transform 0.1s;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  background: #4A90E2;
   box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
-}
-
-.find-car-btn:hover {
-  background: #357ABD;
-  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.35);
+  gap: 10px;
 }
 
 .find-car-btn:active {
@@ -165,8 +168,8 @@ html, body {
 /* Таблица */
 .info-table {
   width: 100%;
-  border-collapse: separate;
   border-spacing: 0;
+  border-collapse: separate;
 }
 
 .info-table tr {
@@ -174,7 +177,7 @@ html, body {
 }
 
 .info-table td {
-  padding: 20px 0;
+  padding: 10px 0;
   border: none;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -184,17 +187,31 @@ html, body {
 }
 
 .info-table .label {
+  font-size: 14px;
   font-weight: 400;
-  color: #999;
-  font-size: 16px;
   vertical-align: top;
+  color: #999;
 }
 
 .info-table .value {
-  color: #333;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 400;
   padding-left: 20px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .info-table .label {
+    font-size: 13px;
+    font-weight: 400;
+    vertical-align: top;
+    color: #999;
+  }
+
+  .info-table .value {
+    font-size: 13px;
+    padding-left: 0;
+  }
 }
 
 .ymaps3x0--controls_vertical {
@@ -205,4 +222,22 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Hover эффекты только для устройств с поддержкой hover */
+@media (hover: hover) and (pointer: fine) {
+  .sidebar-trigger:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  .close-btn:hover {
+    color: #666;
+    background: #e8e8e8;
+  }
+
+  .find-car-btn:hover {
+    background: #357ABD;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.35);
+  }
 }
