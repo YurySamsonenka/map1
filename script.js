@@ -1,6 +1,7 @@
 const deg_to_rad = Math.PI / 180;
 
 let center_coords = null;
+let currentStatus = 'ok'; // Текущий статус для отслеживания изменений
 
 function setCookie(name, value, days = 365) {
   const date = new Date();
@@ -18,6 +19,20 @@ function getCookie(name) {
     if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
   }
   return null;
+}
+
+// Функция для получения пути к картинке в зависимости от статуса
+function getMarkerImage(status) {
+  if (status === 'warning') {
+    return 'yellow.png';
+  } else {
+    if (status === 'error') {
+      return 'red.png';
+    } else {
+      // 'ok' или null
+      return '49568490-4ac8-474e-b8ba-35137d30d9e2.png';
+    }
+  }
 }
 
 async function getInitialCoordinates() {
@@ -69,6 +84,15 @@ async function getInitialCoordinates() {
   carIcon.alt = 'car marker';
   carIcon.className = 'car-icon';
 
+  // Создаем элементы для пульсации (две волны)
+  const pulseWave1 = document.createElement('div');
+  pulseWave1.className = 'pulse-wave';
+
+  const pulseWave2 = document.createElement('div');
+  pulseWave2.className = 'pulse-wave-2';
+
+  markerElement.appendChild(pulseWave1);
+  markerElement.appendChild(pulseWave2);
   markerElement.appendChild(markerCircle);
   markerElement.appendChild(carIcon);
 
@@ -98,11 +122,9 @@ async function getInitialCoordinates() {
     isResizing = true;
     sidebar.classList.add('resizing');
 
-    // Определяем начальные значения для мыши или тача
     startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
     startHeight = sidebar.offsetHeight;
 
-    // Предотвращаем выделение текста при перетаскивании
     e.preventDefault();
   }
 
@@ -113,7 +135,6 @@ async function getInitialCoordinates() {
     const deltaY = currentY - startY;
     const newHeight = startHeight + deltaY;
 
-    // Ограничиваем высоту между min и max значениями
     const minHeight = 300;
     const maxHeight = window.innerHeight * 0.9;
 
@@ -132,12 +153,10 @@ async function getInitialCoordinates() {
     }
   }
 
-  // События для мыши
   resizeHandle.addEventListener('mousedown', startResize);
   document.addEventListener('mousemove', doResize);
   document.addEventListener('mouseup', stopResize);
 
-  // События для тач-устройств
   resizeHandle.addEventListener('touchstart', startResize, { passive: false });
   document.addEventListener('touchmove', doResize, { passive: false });
   document.addEventListener('touchend', stopResize);
@@ -192,12 +211,47 @@ async function getInitialCoordinates() {
     });
   };
 
+  // Функция обновления статуса маркера
+  function updateMarkerStatus(status) {
+    if (status === currentStatus) return; // Не обновляем, если статус не изменился
+
+    currentStatus = status;
+
+    // Обновляем изображение маркера
+    carIcon.src = getMarkerImage(status);
+
+    // Удаляем все классы статусов
+    markerCircle.classList.remove('status-ok', 'status-warning', 'status-error');
+
+    // Добавляем нужный класс в зависимости от статуса
+    if (status === 'warning') {
+      markerCircle.classList.add('status-warning');
+    } else {
+      if (status === 'error') {
+        markerCircle.classList.add('status-error');
+      } else {
+        // 'ok' или null
+        markerCircle.classList.add('status-ok');
+      }
+    }
+
+    // Управляем пульсацией (только для error)
+    if (status === 'error') {
+      pulseWave1.classList.add('active');
+      pulseWave2.classList.add('active');
+    } else {
+      pulseWave1.classList.remove('active');
+      pulseWave2.classList.remove('active');
+    }
+  }
+
   function updatePanelData(data) {
     const tableBody = document.querySelector('.info-table');
     tableBody.innerHTML = '';
 
     data.forEach((item) => {
-      if (item.field !== 'longitude' && item.field !== 'latitude') {
+      // Исключаем поля longitude, latitude и status из таблицы
+      if (item.field !== 'longitude' && item.field !== 'latitude' && item.field !== 'status') {
         const row = document.createElement('tr');
         row.innerHTML = `
           <td class="label">${item.name}:</td>
@@ -248,8 +302,14 @@ async function getInitialCoordinates() {
 
       const lon = parseFloat(data.find((i) => i.field === 'longitude')?.value);
       const lat = parseFloat(data.find((i) => i.field === 'latitude')?.value);
+      const statusItem = data.find((i) => i.field === 'status');
+      const status = statusItem ? statusItem.value : null;
 
-      console.log(lon, lat);
+      console.log('Coordinates:', lon, lat);
+      console.log('Status:', status);
+
+      // Обновляем статус маркера
+      updateMarkerStatus(status);
 
       if (lon && lat) {
         if (Math.abs(lon - center_coords[0]) > 0.000001 || Math.abs(lat - center_coords[1]) > 0.000001) {
