@@ -163,6 +163,22 @@ html, body {
   flex: 1;
   padding: 0 28px 0;
   background: white;
+  scrollbar-gutter: stable; /* Предотвращает дергание */
+  scrollbar-width: thin; /* Firefox */
+}
+
+/* Стилизация для Webkit */
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .sidebar-footer {
