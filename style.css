@@ -23,10 +23,10 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  padding: 10px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, opacity 0.4s ease-in-out;
+  text-align: center;
   opacity: 1;
   color: #333;
   border: none;
@@ -239,16 +239,14 @@ html, body {
 
 .marker-circle {
   position: absolute;
-  top: 50%;
-  left: 50%;
   width: 41px;
   height: 41px;
-  border: 3px solid #4A90E2;
-  border-radius: 50%;
-  transform: translate(-50%, -51%);
+  transition: opacity 0.3s ease;
+  transform: translate(-22.5px, -22.5px);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  border: 3px solid #4A90E2;
+  border-radius: 50%;
   box-shadow: 0 0 12px rgba(74, 144, 226, 0.4);
 }
 
@@ -257,13 +255,14 @@ html, body {
 }
 
 .car-icon {
-  width: 41px;
-  height: 41px;
-  cursor: pointer;
   position: relative;
   z-index: 1;
   display: block;
+  width: 41px;
+  height: 41px;
+  cursor: pointer;
   transition: transform 0.15s ease, filter 0.15s ease;
+  transform: translate(-20px, -20px);
 }
 
 .car-icon:active {
