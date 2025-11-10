@@ -2,6 +2,24 @@ const deg_to_rad = Math.PI / 180;
 
 let center_coords = null;
 
+function setCookie(name, value, days = 365) {
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = 'expires=' + date.toUTCString();
+  document.cookie = name + '=' + value + ';' + expires + ';path=/';
+}
+
+function getCookie(name) {
+  const nameEQ = name + '=';
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
 async function getInitialCoordinates() {
   try {
     const response = await fetch('https://enteneller.ru/moscow_car/api/sensors/get/');
@@ -60,6 +78,17 @@ async function getInitialCoordinates() {
   const findCarBtn = document.getElementById('find-car-btn');
   const resizeHandle = document.getElementById('resize-handle');
 
+  const savedHeight = getCookie('sidebarHeight');
+  if (savedHeight) {
+    const height = parseInt(savedHeight, 10);
+    const minHeight = 300;
+    const maxHeight = window.innerHeight * 0.9;
+
+    if (height >= minHeight && height <= maxHeight) {
+      sidebar.style.height = `${height}px`;
+    }
+  }
+
   // Функционал изменения размера
   let isResizing = false;
   let startY = 0;
@@ -97,6 +126,9 @@ async function getInitialCoordinates() {
     if (isResizing) {
       isResizing = false;
       sidebar.classList.remove('resizing');
+
+      const currentHeight = sidebar.offsetHeight;
+      setCookie('sidebarHeight', currentHeight);
     }
   }
 
