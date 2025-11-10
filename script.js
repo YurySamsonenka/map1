@@ -34,16 +34,7 @@ async function getInitialCoordinates() {
   const map = new YMap(document.getElementById('map'), {
     location: { center: center_coords, zoom: 17 },
     mode: 'vector',
-    behaviors: [
-      'drag', // Перетаскивание мышью
-      'scrollZoom', // Зум колесом мыши
-      'dblClick', // Двойной клик для зума
-      'mouseTilt', // Наклон карты мышью
-      'mouseRotate', // Вращение карты мышью
-      'pinchRotate', // Вращение карты двумя пальцами на тач-устройствах
-      'pinchZoom', // Зум двумя пальцами на тач-устройствах
-      'panTilt' // Наклон карты на тач-устройствах (свайп двумя пальцами вверх/вниз)
-    ]
+    behaviors: ['drag', 'scrollZoom', 'dblClick', 'mouseTilt', 'mouseRotate', 'pinchRotate', 'pinchZoom', 'panTilt']
   });
 
   map.addChild(new YMapDefaultSchemeLayer());
@@ -67,6 +58,57 @@ async function getInitialCoordinates() {
   const sidebarTrigger = document.getElementById('sidebar-trigger');
   const closeSidebar = document.getElementById('close-sidebar');
   const findCarBtn = document.getElementById('find-car-btn');
+  const resizeHandle = document.getElementById('resize-handle');
+
+  // Функционал изменения размера
+  let isResizing = false;
+  let startY = 0;
+  let startHeight = 0;
+
+  function startResize(e) {
+    isResizing = true;
+    sidebar.classList.add('resizing');
+
+    // Определяем начальные значения для мыши или тача
+    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    startHeight = sidebar.offsetHeight;
+
+    // Предотвращаем выделение текста при перетаскивании
+    e.preventDefault();
+  }
+
+  function doResize(e) {
+    if (!isResizing) return;
+
+    const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    const deltaY = currentY - startY;
+    const newHeight = startHeight + deltaY;
+
+    // Ограничиваем высоту между min и max значениями
+    const minHeight = 300;
+    const maxHeight = window.innerHeight * 0.9;
+
+    if (newHeight >= minHeight && newHeight <= maxHeight) {
+      sidebar.style.height = `${newHeight}px`;
+    }
+  }
+
+  function stopResize() {
+    if (isResizing) {
+      isResizing = false;
+      sidebar.classList.remove('resizing');
+    }
+  }
+
+  // События для мыши
+  resizeHandle.addEventListener('mousedown', startResize);
+  document.addEventListener('mousemove', doResize);
+  document.addEventListener('mouseup', stopResize);
+
+  // События для тач-устройств
+  resizeHandle.addEventListener('touchstart', startResize, { passive: false });
+  document.addEventListener('touchmove', doResize, { passive: false });
+  document.addEventListener('touchend', stopResize);
 
   function openSidebar() {
     sidebar.classList.add('open');
