@@ -1,7 +1,7 @@
 const deg_to_rad = Math.PI / 180;
 
 let center_coords = null;
-let currentStatus = 'ok'; // Текущий статус для отслеживания изменений
+let currentStatus = 'ok';
 
 function setCookie(name, value, days = 365) {
   const date = new Date();
@@ -21,7 +21,6 @@ function getCookie(name) {
   return null;
 }
 
-// Функция для получения пути к картинке в зависимости от статуса
 function getMarkerImage(status) {
   if (status === 'warning') {
     return 'yellow.png';
@@ -29,7 +28,6 @@ function getMarkerImage(status) {
     if (status === 'error') {
       return 'red.png';
     } else {
-      // 'ok' или null
       return '49568490-4ac8-474e-b8ba-35137d30d9e2.png';
     }
   }
@@ -84,7 +82,6 @@ async function getInitialCoordinates() {
   carIcon.alt = 'car marker';
   carIcon.className = 'car-icon';
 
-  // Создаем элементы для пульсации (две волны)
   const pulseWave1 = document.createElement('div');
   pulseWave1.className = 'pulse-wave';
 
@@ -113,7 +110,6 @@ async function getInitialCoordinates() {
     }
   }
 
-  // Функционал изменения размера
   let isResizing = false;
   let startY = 0;
   let startHeight = 0;
@@ -211,31 +207,25 @@ async function getInitialCoordinates() {
     });
   };
 
-  // Функция обновления статуса маркера
   function updateMarkerStatus(status) {
-    if (status === currentStatus) return; // Не обновляем, если статус не изменился
+    if (status === currentStatus) return;
 
     currentStatus = status;
 
-    // Обновляем изображение маркера
     carIcon.src = getMarkerImage(status);
 
-    // Удаляем все классы статусов
     markerCircle.classList.remove('status-ok', 'status-warning', 'status-error');
 
-    // Добавляем нужный класс в зависимости от статуса
     if (status === 'warning') {
       markerCircle.classList.add('status-warning');
     } else {
       if (status === 'error') {
         markerCircle.classList.add('status-error');
       } else {
-        // 'ok' или null
         markerCircle.classList.add('status-ok');
       }
     }
 
-    // Управляем пульсацией (только для error)
     if (status === 'error') {
       pulseWave1.classList.add('active');
       pulseWave2.classList.add('active');
@@ -250,7 +240,6 @@ async function getInitialCoordinates() {
     tableBody.innerHTML = '';
 
     data.forEach((item) => {
-      // Исключаем поля longitude, latitude и status из таблицы
       if (item.field !== 'longitude' && item.field !== 'latitude' && item.field !== 'status') {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -308,7 +297,6 @@ async function getInitialCoordinates() {
       console.log('Coordinates:', lon, lat);
       console.log('Status:', status);
 
-      // Обновляем статус маркера
       updateMarkerStatus(status);
 
       if (lon && lat) {

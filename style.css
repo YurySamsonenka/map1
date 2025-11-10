@@ -312,7 +312,6 @@ html, body {
   opacity: 1;
 }
 
-/* Цвета обводки для разных статусов */
 .marker-circle.status-ok {
   border-color: #5cb85c;
   box-shadow: 0 0 12px rgba(92, 184, 92, 0.6);
@@ -343,7 +342,6 @@ html, body {
   filter: brightness(0.8);
 }
 
-/* Анимация пульсации для статуса error */
 .pulse-wave {
   position: absolute;
   top: 50%;
@@ -372,7 +370,6 @@ html, body {
   }
 }
 
-/* Вторая волна с задержкой */
 .pulse-wave-2 {
   position: absolute;
   top: 50%;
