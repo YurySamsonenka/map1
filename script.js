@@ -2,6 +2,8 @@ const deg_to_rad = Math.PI / 180;
 
 let center_coords = null;
 let currentStatus = null;
+let calendar = null;
+let selectedDate = null;
 
 function setCookie(name, value, days = 365) {
   const date = new Date();
@@ -51,6 +53,75 @@ async function getInitialCoordinates() {
   }
 }
 
+function getTodayISO() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+}
+
+function initCalendar() {
+  if (typeof VanillaCalendar !== 'undefined') {
+    const todayStr = getTodayISO();
+
+    const options = {
+      settings: {
+        lang: 'ru',
+        iso8601: true,
+        range: {
+          min: '2020-01-01',
+          max: '2026-12-31'
+        },
+        selection: {
+          day: 'single'
+        },
+        selected: {
+          dates: [todayStr]
+        },
+        visibility: {
+          theme: 'light'
+        }
+      },
+      actions: {
+        clickDay(e, self) {
+          if (self.selectedDates && self.selectedDates.length > 0) {
+            selectedDate = self.selectedDates[0];
+            console.log('Выбрана дата:', selectedDate);
+
+            const dateBtnText = document.getElementById('date-btn-text');
+            dateBtnText.textContent = formatDate(selectedDate);
+
+            const calendarSection = document.getElementById('calendar-section');
+            calendarSection.classList.add('hidden');
+
+            const sidebarContent = document.querySelector('.sidebar-content');
+            sidebarContent.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }
+      }
+    };
+
+    calendar = new VanillaCalendar('#calendar', options);
+    calendar.init();
+
+    if (!selectedDate) {
+      selectedDate = todayStr;
+      document.getElementById('date-btn-text').textContent = formatDate(todayStr);
+    }
+  } else {
+    setTimeout(initCalendar, 100);
+  }
+}
+
 (async () => {
   center_coords = await getInitialCoordinates();
 
@@ -97,6 +168,9 @@ async function getInitialCoordinates() {
   const sidebarTrigger = document.getElementById('sidebar-trigger');
   const closeSidebar = document.getElementById('close-sidebar');
   const findCarBtn = document.getElementById('find-car-btn');
+  const dateSelectBtn = document.getElementById('date-select-btn');
+  const calendarSection = document.getElementById('calendar-section');
+  const sidebarContent = document.querySelector('.sidebar-content');
   const resizeHandle = document.getElementById('resize-handle');
 
   const savedHeight = getCookie('sidebarHeight');
@@ -162,12 +236,17 @@ async function getInitialCoordinates() {
     sidebarTrigger.classList.add('hidden');
     markerCircle.classList.add('active');
     loadDataFromServer();
+
+    if (!calendar) {
+      initCalendar();
+    }
   }
 
   function closeSidebarFunc() {
     sidebar.classList.remove('open');
     sidebarTrigger.classList.remove('hidden');
     markerCircle.classList.remove('active');
+    calendarSection.classList.add('hidden');
   }
 
   markerElement.addEventListener('click', (e) => {
@@ -205,6 +284,29 @@ async function getInitialCoordinates() {
     map.update({
       location: { center: center_coords, duration: 600 }
     });
+  };
+
+  dateSelectBtn.onclick = () => {
+    const isHidden = calendarSection.classList.contains('hidden');
+
+    if (isHidden) {
+      calendarSection.classList.remove('hidden');
+
+      setTimeout(() => {
+        const scrollToBottom = () => {
+          sidebarContent.scrollTo({
+            top: sidebarContent.scrollHeight + 1000,
+            behavior: 'smooth'
+          });
+        };
+
+        scrollToBottom();
+
+        setTimeout(scrollToBottom, 200);
+      }, 150);
+    } else {
+      calendarSection.classList.add('hidden');
+    }
   };
 
   function updateMarkerStatus(status) {

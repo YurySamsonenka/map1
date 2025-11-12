@@ -161,7 +161,7 @@ html, body {
 .sidebar-content {
   overflow-y: auto;
   flex: 1;
-  padding: 0 28px 0;
+  padding: 0 28px 20px;
   background: white;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
@@ -187,29 +187,44 @@ html, body {
   background: white;
 }
 
-.find-car-btn {
-  font-size: 16px;
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.find-car-btn,
+.date-select-btn {
+  font-size: 15px;
   font-weight: 600;
   display: flex;
   align-items: center;
+  flex: 1;
   justify-content: center;
-  width: 100%;
-  padding: 16px 24px;
+  min-width: 0;
+  padding: 14px 20px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  white-space: nowrap;
   color: white;
   border: none;
   border-radius: 12px;
-  background: #4A90E2;
-  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
-  gap: 10px;
+  gap: 8px;
 }
 
-.find-car-btn:active {
+.find-car-btn,
+.date-select-btn {
+  background: #4A90E2;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
+}
+
+.find-car-btn:active,
+.date-select-btn:active {
   transform: scale(0.98);
 }
 
-.find-car-btn svg {
+.find-car-btn svg,
+.date-select-btn svg {
   flex-shrink: 0;
 }
 
@@ -247,6 +262,92 @@ html, body {
   color: #333;
 }
 
+/* Календарь */
+.calendar-section {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  max-height: 1000px;
+  margin-top: 24px;
+  padding-top: 24px;
+  transition: opacity 0.3s ease, max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+  opacity: 1;
+  border-top: 1px solid #f0f0f0;
+}
+
+.calendar-section.hidden {
+  overflow: hidden;
+  max-height: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  border: none;
+}
+
+.calendar-header {
+  margin-bottom: 16px;
+}
+
+.calendar-header h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+#calendar {
+  /*border-radius: 12px;*/
+  /*overflow: hidden;*/
+}
+
+/* Кастомизация vanilla-calendar */
+.vanilla-calendar {
+  /*font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;*/
+  border: 1px solid #f0f0f0 !important;
+  border-radius: 12px !important;
+  /*box-shadow: none !important;*/
+}
+
+.vanilla-calendar-header__content {
+  /*background: #f8f9fa !important;*/
+}
+
+.vanilla-calendar-week__day {
+  /*color: #999 !important;*/
+  /*font-weight: 500 !important;*/
+}
+
+.vanilla-calendar-day__btn {
+  /*border-radius: 8px !important;*/
+  /*transition: all 0.2s ease !important;*/
+}
+
+.vanilla-calendar-day__btn:hover {
+  /*background: #f0f0f0 !important;*/
+}
+
+.vanilla-calendar-day__btn_selected {
+  background: #4A90E2 !important;
+  /*color: white !important;*/
+}
+
+.vanilla-calendar-day__btn_today {
+  color: #4A90E2 !important;
+  border: 2px solid #4A90E2 !important;
+}
+
+.vanilla-calendar-day__btn_selected {
+  color: white !important;
+}
+
+.vanilla-calendar-months__month_selected {
+  background: #4A90E2 !important;
+}
+
+.vanilla-calendar-years__year_selected {
+  background: #4A90E2 !important;
+}
+
 @media (max-width: 768px) {
   .info-table .label {
     font-size: 13px;
@@ -258,6 +359,24 @@ html, body {
   .info-table .value {
     font-size: 13px;
     padding-left: 0;
+  }
+
+  .calendar-section {
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  .calendar-header h4 {
+    font-size: 16px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .find-car-btn,
+  .date-select-btn {
+    width: 100%;
   }
 }
 
@@ -281,7 +400,8 @@ html, body {
     background: #e8e8e8;
   }
 
-  .find-car-btn:hover {
+  .find-car-btn:hover,
+  .date-select-btn:hover {
     background: #357ABD;
     box-shadow: 0 4px 12px rgba(74, 144, 226, 0.35);
   }
