@@ -1,7 +1,7 @@
 const deg_to_rad = Math.PI / 180;
 
 let center_coords = null;
-let currentStatus = 'ok';
+let currentStatus = null;
 
 function setCookie(name, value, days = 365) {
   const date = new Date();
@@ -292,7 +292,7 @@ async function getInitialCoordinates() {
       const lon = parseFloat(data.find((i) => i.field === 'longitude')?.value);
       const lat = parseFloat(data.find((i) => i.field === 'latitude')?.value);
       const statusItem = data.find((i) => i.field === 'status');
-      const status = statusItem ? statusItem.value : null;
+      const status = statusItem ? statusItem.value : 'ok';
 
       console.log('Coordinates:', lon, lat);
       console.log('Status:', status);
