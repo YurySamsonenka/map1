@@ -1,4 +1,3 @@
-
 html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   overflow: hidden;
@@ -190,16 +189,17 @@ html, body {
 .button-group {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
 }
 
 .find-car-btn,
-.date-select-btn {
+.date-select-btn,
+.toggle-route-btn {
   font-size: 15px;
   font-weight: 600;
   display: flex;
   align-items: center;
-  flex: 1;
   justify-content: center;
   min-width: 0;
   padding: 14px 20px;
@@ -209,23 +209,26 @@ html, body {
   color: white;
   border: none;
   border-radius: 12px;
+  background: #4A90E2;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
   gap: 8px;
 }
 
-.find-car-btn,
-.date-select-btn {
-  background: #4A90E2;
-  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
+.toggle-route-btn.active {
+  background: #5cb85c;
+  box-shadow: 0 2px 8px rgba(92, 184, 92, 0.35);
 }
 
 .find-car-btn:active,
-.date-select-btn:active {
+.date-select-btn:active,
+.toggle-route-btn:active {
   transform: scale(0.98);
 }
 
-.find-car-btn svg,
-.date-select-btn svg {
-  flex-shrink: 0;
+.find-car-btn,
+.toggle-route-btn {
+  min-width: 48px;
+  padding: 14px;
 }
 
 .info-table {
@@ -295,40 +298,17 @@ html, body {
   color: #333;
 }
 
-#calendar {
-  /*border-radius: 12px;*/
-  /*overflow: hidden;*/
-}
-
 /* Кастомизация vanilla-calendar */
 .vanilla-calendar {
-  /*font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;*/
   border: 1px solid #f0f0f0 !important;
   border-radius: 12px !important;
-  /*box-shadow: none !important;*/
 }
 
 .vanilla-calendar-header__content {
-  /*background: #f8f9fa !important;*/
-}
-
-.vanilla-calendar-week__day {
-  /*color: #999 !important;*/
-  /*font-weight: 500 !important;*/
-}
-
-.vanilla-calendar-day__btn {
-  /*border-radius: 8px !important;*/
-  /*transition: all 0.2s ease !important;*/
-}
-
-.vanilla-calendar-day__btn:hover {
-  /*background: #f0f0f0 !important;*/
 }
 
 .vanilla-calendar-day__btn_selected {
   background: #4A90E2 !important;
-  /*color: white !important;*/
 }
 
 .vanilla-calendar-day__btn_today {
@@ -369,15 +349,6 @@ html, body {
   .calendar-header h4 {
     font-size: 16px;
   }
-
-  .button-group {
-    flex-direction: column;
-  }
-
-  .find-car-btn,
-  .date-select-btn {
-    width: 100%;
-  }
 }
 
 .ymaps3x0--controls_vertical {
@@ -401,9 +372,15 @@ html, body {
   }
 
   .find-car-btn:hover,
-  .date-select-btn:hover {
+  .date-select-btn:hover,
+  .toggle-route-btn:hover {
     background: #357ABD;
     box-shadow: 0 4px 12px rgba(74, 144, 226, 0.35);
+  }
+
+  .toggle-route-btn.active:hover {
+    background: #4cae4c;
+    box-shadow: 0 4px 12px rgba(92, 184, 92, 0.45);
   }
 }
 

@@ -4,6 +4,8 @@ let center_coords = null;
 let currentStatus = null;
 let calendar = null;
 let selectedDate = null;
+let routeLine = null;
+let isRouteVisible = false;
 
 function setCookie(name, value, days = 365) {
   const date = new Date();
@@ -105,6 +107,10 @@ function initCalendar() {
 
             const sidebarContent = document.querySelector('.sidebar-content');
             sidebarContent.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (isRouteVisible) {
+              loadRouteForDate(selectedDate);
+            }
           }
         }
       }
@@ -129,7 +135,7 @@ function initCalendar() {
 
   ymaps3.import.registerCdn('https://cdn.jsdelivr.net/npm/{package}', ['@yandex/ymaps3-default-ui-theme@0.0.7']);
 
-  const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker, YMapControls } = ymaps3;
+  const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker, YMapControls, YMapFeature } = ymaps3;
 
   const { YMapRotateTiltControl } = await ymaps3.import('@yandex/ymaps3-default-ui-theme');
 
@@ -169,6 +175,7 @@ function initCalendar() {
   const closeSidebar = document.getElementById('close-sidebar');
   const findCarBtn = document.getElementById('find-car-btn');
   const dateSelectBtn = document.getElementById('date-select-btn');
+  const toggleRouteBtn = document.getElementById('toggle-route-btn');
   const calendarSection = document.getElementById('calendar-section');
   const sidebarContent = document.querySelector('.sidebar-content');
   const resizeHandle = document.getElementById('resize-handle');
@@ -230,6 +237,81 @@ function initCalendar() {
   resizeHandle.addEventListener('touchstart', startResize, { passive: false });
   document.addEventListener('touchmove', doResize, { passive: false });
   document.addEventListener('touchend', stopResize);
+
+  function updateRouteLine(coordinates) {
+    if (routeLine) {
+      map.removeChild(routeLine);
+      routeLine = null;
+    }
+
+    if (coordinates && coordinates.length >= 2) {
+      const convertedCoordinates = coordinates.map((coord) => [coord[1], coord[0]]);
+
+      routeLine = new YMapFeature({
+        geometry: {
+          type: 'LineString',
+          coordinates: convertedCoordinates
+        },
+        style: {
+          stroke: [
+            // Тень для объёма
+            {
+              color: '#00000030',
+              width: 6
+            },
+            // Основная линия
+            {
+              color: '#4A90E2',
+              width: 4
+            }
+          ]
+        }
+      });
+
+      map.addChild(routeLine);
+      console.log('Линия маршрута отрисована:', convertedCoordinates.length, 'точек');
+    }
+  }
+
+  function hideRouteLine() {
+    if (routeLine) {
+      map.removeChild(routeLine);
+      routeLine = null;
+      console.log('Линия маршрута скрыта');
+    }
+  }
+
+  // Функция для загрузки маршрута для выбранной даты
+  async function loadRouteForDate(date) {
+    try {
+      console.log('Загрузка маршрута для даты:', date);
+      const response = await fetch('https://enteneller.ru/moscow_car/api/map/get_points/');
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const coordinates = await response.json();
+      console.log('Получены координаты:', coordinates.length, 'точек');
+
+      updateRouteLine(coordinates);
+
+      // Центрируем карту на маршруте, если есть точки
+      if (coordinates && coordinates.length > 0) {
+        const firstPoint = coordinates[0];
+        const lastPoint = coordinates[coordinates.length - 1];
+
+        // Центрируемся на последней точке маршрута
+        map.update({
+          location: {
+            center: [lastPoint[1], lastPoint[0]],
+            zoom: 12,
+            duration: 600
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке маршрута:', error);
+    }
+  }
 
   function openSidebar() {
     sidebar.classList.add('open');
@@ -306,6 +388,22 @@ function initCalendar() {
       }, 150);
     } else {
       calendarSection.classList.add('hidden');
+    }
+  };
+
+  toggleRouteBtn.onclick = () => {
+    isRouteVisible = !isRouteVisible;
+
+    if (isRouteVisible) {
+      toggleRouteBtn.classList.add('active');
+
+      if (selectedDate) {
+        loadRouteForDate(selectedDate);
+      }
+    } else {
+      toggleRouteBtn.classList.remove('active');
+
+      hideRouteLine();
     }
   };
 
