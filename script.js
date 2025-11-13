@@ -6,6 +6,7 @@ let calendar = null;
 let selectedDate = null;
 let routeLine = null;
 let isRouteVisible = false;
+let currentRouteColor = '#4A90E2';
 
 function setCookie(name, value, days = 365) {
   const date = new Date();
@@ -37,12 +38,22 @@ function getMarkerImage(status) {
   }
 }
 
+async function fetchAPI(endpoint) {
+  try {
+    const response = await fetch(`https://enteneller.ru/moscow_car/api/${endpoint}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Ошибка при запросе к ${endpoint}:`, error);
+    throw error;
+  }
+}
+
 async function getInitialCoordinates() {
   try {
-    const response = await fetch('https://enteneller.ru/moscow_car/api/sensors/get/');
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-    const data = await response.json();
+    const data = await fetchAPI('sensors/get/');
     const lon = parseFloat(data.find((i) => i.field === 'longitude')?.value);
     const lat = parseFloat(data.find((i) => i.field === 'latitude')?.value);
 
@@ -141,29 +152,31 @@ function initCalendar(initialDate = null) {
   }
 }
 
-function positionCalendarModal() {
-  const calendarModal = document.getElementById('calendar-modal');
-  const calendarContent = calendarModal.querySelector('.calendar-modal-content');
-  const dateSelectBtn = document.getElementById('date-select-btn');
-  if (!calendarModal || !calendarContent || !dateSelectBtn) return;
+function positionModal(modalId, buttonElement) {
+  const modal = document.getElementById(modalId);
+  const modalContent = modal.querySelector(
+    `${modalId === 'calendar-modal' ? '.calendar-modal-content' : '.color-modal-content'}`
+  );
+
+  if (!modal || !modalContent || !buttonElement) return;
 
   const isMobile = window.innerWidth <= 768 || window.innerHeight <= 768;
 
   if (isMobile) {
-    calendarContent.style.left = '';
-    calendarContent.style.bottom = '';
+    modalContent.style.left = '';
+    modalContent.style.bottom = '';
   } else {
-    const btnRect = dateSelectBtn.getBoundingClientRect();
+    const btnRect = buttonElement.getBoundingClientRect();
 
     setTimeout(() => {
-      const modalWidth = calendarContent.offsetWidth;
+      const modalWidth = modalContent.offsetWidth;
       const btnCenterX = btnRect.left + btnRect.width / 2;
       let left = btnCenterX - modalWidth / 2;
       left = Math.max(8, Math.min(left, window.innerWidth - modalWidth - 8));
-      calendarContent.style.left = `${left}px`;
+      modalContent.style.left = `${left}px`;
 
       const bottom = window.innerHeight - btnRect.top + 12;
-      calendarContent.style.bottom = `${bottom}px`;
+      modalContent.style.bottom = `${bottom}px`;
     }, 0);
   }
 }
@@ -219,6 +232,10 @@ function positionCalendarModal() {
   const calendarModal = document.getElementById('calendar-modal');
   const resizeHandle = document.getElementById('resize-handle');
   const resetDateBtn = document.getElementById('reset-date-btn');
+  const colorRouteBtn = document.getElementById('color-route-btn');
+  const colorModal = document.getElementById('color-modal');
+  const colorOptions = document.querySelectorAll('.color-option');
+  const routeColorCircle = document.querySelector('.route-color-circle');
 
   const savedHeight = getCookie('sidebarHeight');
   if (savedHeight) {
@@ -295,12 +312,8 @@ function positionCalendarModal() {
         style: {
           stroke: [
             {
-              color: '#00000030',
+              color: currentRouteColor,
               width: 6
-            },
-            {
-              color: '#4A90E2',
-              width: 4
             }
           ]
         }
@@ -322,18 +335,13 @@ function positionCalendarModal() {
   async function loadRouteForDate(date) {
     try {
       console.log('Загрузка маршрута для даты:', date);
-      const response = await fetch('https://enteneller.ru/moscow_car/api/map/get_points/');
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const coordinates = await response.json();
+      const coordinates = await fetchAPI('map/get_points/');
       console.log('Получены координаты:', coordinates.length, 'точек');
 
       updateRouteLine(coordinates);
 
       if (coordinates && coordinates.length > 0) {
         const lastPoint = coordinates[coordinates.length - 1];
-
         map.update({
           location: {
             center: [lastPoint[1], lastPoint[0]],
@@ -408,7 +416,7 @@ function positionCalendarModal() {
     if (!isVisible) {
       calendarModal.classList.add('show');
       dateSelectBtn.classList.add('active');
-      positionCalendarModal();
+      positionModal('calendar-modal', dateSelectBtn);
     } else {
       calendarModal.classList.remove('show');
       dateSelectBtn.classList.remove('active');
@@ -420,16 +428,50 @@ function positionCalendarModal() {
 
     if (isRouteVisible) {
       toggleRouteBtn.classList.add('active');
+      colorRouteBtn.style.display = 'flex';
 
       if (selectedDate) {
         loadRouteForDate(selectedDate);
       }
     } else {
       toggleRouteBtn.classList.remove('active');
+      colorRouteBtn.style.display = 'none';
 
       hideRouteLine();
     }
   };
+
+  colorRouteBtn.onclick = () => {
+    const isVisible = colorModal.classList.contains('show');
+    if (!isVisible) {
+      colorModal.classList.add('show');
+      colorRouteBtn.classList.add('active');
+      positionModal('color-modal', colorRouteBtn);
+    } else {
+      colorModal.classList.remove('show');
+      colorRouteBtn.classList.remove('active');
+    }
+  };
+
+  colorOptions.forEach((option) => {
+    option.addEventListener('click', (e) => {
+      const selectedColor = e.target.dataset.color;
+
+      currentRouteColor = selectedColor;
+
+      routeColorCircle.style.background = selectedColor;
+
+      if (isRouteVisible && selectedDate) {
+        loadRouteForDate(selectedDate);
+      }
+
+      colorModal.classList.remove('show');
+      colorRouteBtn.classList.remove('active');
+
+      colorOptions.forEach((opt) => opt.classList.remove('selected'));
+      e.target.classList.add('selected');
+    });
+  });
 
   resetDateBtn.addEventListener('click', () => {
     const todayISO = getTodayISO();
@@ -459,9 +501,24 @@ function positionCalendarModal() {
     }
   });
 
+  colorModal.addEventListener('click', (e) => {
+    if (e.target === colorModal) {
+      colorModal.classList.remove('show');
+      colorRouteBtn.classList.remove('active');
+    }
+  });
+
   window.addEventListener('resize', () => {
+    const calendarModal = document.getElementById('calendar-modal');
+    const dateSelectBtn = document.getElementById('date-select-btn');
+    const colorModal = document.getElementById('color-modal');
+    const colorRouteBtn = document.getElementById('color-route-btn');
+
     if (calendarModal.classList.contains('show')) {
-      positionCalendarModal();
+      positionModal('calendar-modal', dateSelectBtn);
+    }
+    if (colorModal.classList.contains('show')) {
+      positionModal('color-modal', colorRouteBtn);
     }
   });
 
@@ -542,10 +599,7 @@ function positionCalendarModal() {
 
   async function loadDataFromServer() {
     try {
-      const response = await fetch('https://enteneller.ru/moscow_car/api/sensors/get/');
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const data = await response.json();
+      const data = await fetchAPI('sensors/get/');
 
       const lon = parseFloat(data.find((i) => i.field === 'longitude')?.value);
       const lat = parseFloat(data.find((i) => i.field === 'latitude')?.value);
@@ -568,8 +622,8 @@ function positionCalendarModal() {
       console.error('Ошибка при обновлении:', err);
       if (sidebar.classList.contains('open')) {
         document.querySelector('.info-table').innerHTML = `
-          <tr><td colspan="2" style="text-align:center;color:red;">Ошибка загрузки данных</td></tr>
-        `;
+        <tr><td colspan="2" style="text-align:center;color:red;">Ошибка загрузки данных</td></tr>
+      `;
       }
     }
   }

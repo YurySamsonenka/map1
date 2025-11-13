@@ -200,14 +200,15 @@ html, body {
 
 .button-group {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
 }
 
 .find-car-btn,
 .date-select-btn,
-.toggle-route-btn {
+.toggle-route-btn,
+.color-route-btn {
   font-size: 15px;
   font-weight: 600;
   display: flex;
@@ -227,21 +228,33 @@ html, body {
 }
 
 .date-select-btn.active,
-.toggle-route-btn.active {
+.toggle-route-btn.active,
+.color-route-btn.active {
   background: #5cb85c;
   box-shadow: 0 2px 8px rgba(92, 184, 92, 0.35);
 }
 
 .find-car-btn:active,
 .date-select-btn:active,
-.toggle-route-btn:active {
+.toggle-route-btn:active,
+.color-route-btn:active {
   transform: scale(0.98);
 }
 
 .find-car-btn,
-.toggle-route-btn {
+.toggle-route-btn,
+.color-route-btn {
   min-width: 48px;
   padding: 14px;
+}
+
+.route-color-circle {
+  display: block;
+  width: 15px;
+  height: 15px;
+  border: 2px solid black;
+  border-radius: 50%;
+  background: #4A90E2;
 }
 
 .info-table {
@@ -278,7 +291,8 @@ html, body {
   color: #333;
 }
 
-.calendar-modal {
+.calendar-modal,
+.color-modal {
   position: fixed;
   z-index: 2000;
   top: 0;
@@ -294,13 +308,15 @@ html, body {
   opacity: 0;
 }
 
-.calendar-modal.show {
+.calendar-modal.show,
+.color-modal.show {
   visibility: visible;
   pointer-events: auto;
   opacity: 1;
 }
 
-.calendar-modal-content {
+.calendar-modal-content,
+.color-modal-content {
   position: fixed;
   padding: 20px;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
@@ -311,21 +327,27 @@ html, body {
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
 }
 
-.calendar-modal.show .calendar-modal-content {
+.calendar-modal.show .calendar-modal-content,
+.color-modal.show .color-modal-content {
   transform: translateY(0);
   opacity: 1;
 }
 
-.calendar-header {
-  position: relative;
+.calendar-header,
+.color-header {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 16px;
+}
+
+.calendar-header {
+  position: relative;
   gap: 12px;
 }
 
-.calendar-header h4 {
+.calendar-header h4,
+.color-header h4 {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
@@ -359,11 +381,13 @@ html, body {
 }
 
 @media (max-width: 768px), (max-height: 768px) {
-  .calendar-modal {
+  .calendar-modal,
+  .color-modal {
     background: rgba(0, 0, 0, 0.4);
   }
 
-  .calendar-modal-content {
+  .calendar-modal-content,
+  .color-modal-content {
     position: relative !important;
     right: auto !important;
     bottom: auto !important;
@@ -383,7 +407,8 @@ html, body {
     padding-left: 0;
   }
 
-  .calendar-header h4 {
+  .calendar-header h4,
+  .color-header h4 {
     font-size: 16px;
   }
 
@@ -417,13 +442,15 @@ html, body {
 
   .find-car-btn:hover,
   .date-select-btn:hover,
-  .toggle-route-btn:hover {
+  .toggle-route-btn:hover,
+  .color-route-btn:hover {
     background: #357ABD;
     box-shadow: 0 4px 12px rgba(74, 144, 226, 0.35);
   }
 
   .date-select-btn.active:hover,
-  .toggle-route-btn.active:hover {
+  .toggle-route-btn.active:hover,
+  .color-route-btn.active:hover {
     background: #4cae4c;
     box-shadow: 0 4px 12px rgba(92, 184, 92, 0.45);
   }
@@ -484,7 +511,8 @@ html, body {
   filter: brightness(0.8);
 }
 
-.pulse-wave {
+.pulse-wave,
+.pulse-wave-2 {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -501,6 +529,10 @@ html, body {
   animation: pulse 2s ease-out infinite;
 }
 
+.pulse-wave-2.active {
+  animation: pulse 2s ease-out infinite 1s;
+}
+
 @keyframes pulse {
   0% {
     transform: translate(-50%, -50%) scale(1);
@@ -512,19 +544,33 @@ html, body {
   }
 }
 
-.pulse-wave-2 {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 41px;
-  height: 41px;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  opacity: 0;
-  border: 3px solid #e74c3c;
-  border-radius: 50%;
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 280px;
+  gap: 12px;
 }
 
-.pulse-wave-2.active {
-  animation: pulse 2s ease-out infinite 1s;
+.color-option {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.color-option:active {
+  transform: scale(0.95);
+}
+
+.color-option.selected {
+  border-color: #333;
 }
