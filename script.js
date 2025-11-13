@@ -1,3 +1,21 @@
+const ROUTE_COLORS = [
+  '#E74C3C',
+  '#3498DB',
+  '#F39C12',
+  '#9B59B6',
+  '#1ABC9C',
+  '#75A863',
+  '#FF1493',
+  '#446DAC',
+  '#88458A',
+  '#00CED1',
+  '#B1D451',
+  '#D2691E',
+  '#FF69B4',
+  '#AAAAAA',
+  '#000000'
+];
+
 const deg_to_rad = Math.PI / 180;
 
 let center_coords = null;
@@ -6,7 +24,7 @@ let calendar = null;
 let selectedDate = null;
 let routeLine = null;
 let isRouteVisible = false;
-let currentRouteColor = '#4A90E2';
+let currentRouteColor = ROUTE_COLORS[0];
 
 function setCookie(name, value, days = 365) {
   const date = new Date();
@@ -80,6 +98,30 @@ function formatDate(dateString) {
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
+}
+
+function initColorPicker() {
+  const colorPickerContainer = document.getElementById('color-picker');
+  const routeColorCircle = document.querySelector('.route-color-circle');
+
+  colorPickerContainer.innerHTML = '';
+
+  ROUTE_COLORS.forEach((color, index) => {
+    const button = document.createElement('button');
+    button.className = 'color-option';
+    button.dataset.color = color;
+    button.style.background = color;
+
+    if (index === 0) {
+      button.classList.add('selected');
+    }
+
+    colorPickerContainer.appendChild(button);
+  });
+
+  if (routeColorCircle) {
+    routeColorCircle.style.background = currentRouteColor;
+  }
 }
 
 function initCalendar(initialDate = null) {
@@ -160,7 +202,7 @@ function positionModal(modalId, buttonElement) {
 
   if (!modal || !modalContent || !buttonElement) return;
 
-  const isMobile = window.innerWidth <= 768 || window.innerHeight <= 768;
+  const isMobile = window.innerWidth <= 768 || window.innerHeight <= 480;
 
   if (isMobile) {
     modalContent.style.left = '';
@@ -183,6 +225,8 @@ function positionModal(modalId, buttonElement) {
 
 (async () => {
   center_coords = await getInitialCoordinates();
+
+  initColorPicker();
 
   await ymaps3.ready;
 
@@ -234,7 +278,6 @@ function positionModal(modalId, buttonElement) {
   const resetDateBtn = document.getElementById('reset-date-btn');
   const colorRouteBtn = document.getElementById('color-route-btn');
   const colorModal = document.getElementById('color-modal');
-  const colorOptions = document.querySelectorAll('.color-option');
   const routeColorCircle = document.querySelector('.route-color-circle');
 
   const savedHeight = getCookie('sidebarHeight');
@@ -453,24 +496,25 @@ function positionModal(modalId, buttonElement) {
     }
   };
 
-  colorOptions.forEach((option) => {
-    option.addEventListener('click', (e) => {
-      const selectedColor = e.target.dataset.color;
+  document.getElementById('color-picker').addEventListener('click', (e) => {
+    const colorOption = e.target.closest('.color-option');
+    if (!colorOption) return;
 
-      currentRouteColor = selectedColor;
+    const selectedColor = colorOption.dataset.color;
 
-      routeColorCircle.style.background = selectedColor;
+    currentRouteColor = selectedColor;
 
-      if (isRouteVisible && selectedDate) {
-        loadRouteForDate(selectedDate);
-      }
+    routeColorCircle.style.background = selectedColor;
 
-      colorModal.classList.remove('show');
-      colorRouteBtn.classList.remove('active');
+    if (isRouteVisible && selectedDate) {
+      loadRouteForDate(selectedDate);
+    }
 
-      colorOptions.forEach((opt) => opt.classList.remove('selected'));
-      e.target.classList.add('selected');
-    });
+    colorModal.classList.remove('show');
+    colorRouteBtn.classList.remove('active');
+
+    document.querySelectorAll('.color-option').forEach((opt) => opt.classList.remove('selected'));
+    colorOption.classList.add('selected');
   });
 
   resetDateBtn.addEventListener('click', () => {
