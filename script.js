@@ -71,9 +71,10 @@ function formatDate(dateString) {
   return `${day}.${month}.${year}`;
 }
 
-function initCalendar() {
+function initCalendar(initialDate = null) {
   if (typeof VanillaCalendar !== 'undefined') {
-    const todayStr = getTodayISO();
+    const dateToUse = initialDate || getTodayISO();
+    const dateObj = new Date(dateToUse);
 
     const options = {
       settings: {
@@ -87,7 +88,9 @@ function initCalendar() {
           day: 'single'
         },
         selected: {
-          dates: [todayStr]
+          dates: [dateToUse],
+          month: dateObj.getMonth(),
+          year: dateObj.getFullYear()
         },
         visibility: {
           theme: 'light'
@@ -116,15 +119,22 @@ function initCalendar() {
       }
     };
 
+    if (calendar) {
+      calendar.destroy();
+    }
+
     calendar = new VanillaCalendar('#calendar', options);
     calendar.init();
 
     if (!selectedDate) {
-      selectedDate = todayStr;
-      document.getElementById('date-btn-text').textContent = formatDate(todayStr);
+      selectedDate = dateToUse;
+      const dateBtnText = document.getElementById('date-btn-text');
+      if (dateBtnText) {
+        dateBtnText.textContent = formatDate(dateToUse);
+      }
     }
   } else {
-    setTimeout(initCalendar, 100);
+    setTimeout(() => initCalendar(initialDate), 100);
   }
 }
 
@@ -179,6 +189,7 @@ function initCalendar() {
   const calendarSection = document.getElementById('calendar-section');
   const sidebarContent = document.querySelector('.sidebar-content');
   const resizeHandle = document.getElementById('resize-handle');
+  const resetDateBtn = document.getElementById('reset-date-btn');
 
   const savedHeight = getCookie('sidebarHeight');
   if (savedHeight) {
@@ -281,7 +292,6 @@ function initCalendar() {
     }
   }
 
-  // Функция для загрузки маршрута для выбранной даты
   async function loadRouteForDate(date) {
     try {
       console.log('Загрузка маршрута для даты:', date);
@@ -294,16 +304,12 @@ function initCalendar() {
 
       updateRouteLine(coordinates);
 
-      // Центрируем карту на маршруте, если есть точки
       if (coordinates && coordinates.length > 0) {
-        const firstPoint = coordinates[0];
         const lastPoint = coordinates[coordinates.length - 1];
 
-        // Центрируемся на последней точке маршрута
         map.update({
           location: {
             center: [lastPoint[1], lastPoint[0]],
-            zoom: 12,
             duration: 600
           }
         });
@@ -406,6 +412,27 @@ function initCalendar() {
       hideRouteLine();
     }
   };
+
+  resetDateBtn.addEventListener('click', () => {
+    const todayISO = getTodayISO();
+
+    console.log('Сброс на дату:', todayISO);
+
+    selectedDate = todayISO;
+
+    initCalendar(todayISO);
+
+    const dateBtnText = document.getElementById('date-btn-text');
+    if (dateBtnText) {
+      dateBtnText.textContent = formatDate(todayISO);
+    }
+
+    if (isRouteVisible) {
+      loadRouteForDate(todayISO);
+    }
+
+    console.log('Дата успешно сброшена на текущий день');
+  });
 
   function updateMarkerStatus(status) {
     if (status === currentStatus) return;
