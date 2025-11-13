@@ -37,12 +37,22 @@ function getMarkerImage(status) {
   }
 }
 
+async function fetchAPI(endpoint) {
+  try {
+    const response = await fetch(`https://enteneller.ru/moscow_car/api/${endpoint}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Ошибка при запросе к ${endpoint}:`, error);
+    throw error;
+  }
+}
+
 async function getInitialCoordinates() {
   try {
-    const response = await fetch('https://enteneller.ru/moscow_car/api/sensors/get/');
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-    const data = await response.json();
+    const data = await fetchAPI('sensors/get/');
     const lon = parseFloat(data.find((i) => i.field === 'longitude')?.value);
     const lat = parseFloat(data.find((i) => i.field === 'latitude')?.value);
 
@@ -322,18 +332,13 @@ function positionCalendarModal() {
   async function loadRouteForDate(date) {
     try {
       console.log('Загрузка маршрута для даты:', date);
-      const response = await fetch('https://enteneller.ru/moscow_car/api/map/get_points/');
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const coordinates = await response.json();
+      const coordinates = await fetchAPI('map/get_points/');
       console.log('Получены координаты:', coordinates.length, 'точек');
 
       updateRouteLine(coordinates);
 
       if (coordinates && coordinates.length > 0) {
         const lastPoint = coordinates[coordinates.length - 1];
-
         map.update({
           location: {
             center: [lastPoint[1], lastPoint[0]],
@@ -542,10 +547,7 @@ function positionCalendarModal() {
 
   async function loadDataFromServer() {
     try {
-      const response = await fetch('https://enteneller.ru/moscow_car/api/sensors/get/');
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const data = await response.json();
+      const data = await fetchAPI('sensors/get/');
 
       const lon = parseFloat(data.find((i) => i.field === 'longitude')?.value);
       const lat = parseFloat(data.find((i) => i.field === 'latitude')?.value);
@@ -568,8 +570,8 @@ function positionCalendarModal() {
       console.error('Ошибка при обновлении:', err);
       if (sidebar.classList.contains('open')) {
         document.querySelector('.info-table').innerHTML = `
-          <tr><td colspan="2" style="text-align:center;color:red;">Ошибка загрузки данных</td></tr>
-        `;
+        <tr><td colspan="2" style="text-align:center;color:red;">Ошибка загрузки данных</td></tr>
+      `;
       }
     }
   }
