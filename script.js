@@ -106,13 +106,18 @@ function initColorPicker() {
 
   colorPickerContainer.innerHTML = '';
 
+  const savedColor = getCookie('routeColor');
+  if (savedColor && ROUTE_COLORS.includes(savedColor)) {
+    currentRouteColor = savedColor;
+  }
+
   ROUTE_COLORS.forEach((color, index) => {
     const button = document.createElement('button');
     button.className = 'color-option';
     button.dataset.color = color;
     button.style.background = color;
 
-    if (index === 0) {
+    if (color === currentRouteColor) {
       button.classList.add('selected');
     }
 
@@ -126,7 +131,8 @@ function initColorPicker() {
 
 function initCalendar(initialDate = null) {
   if (typeof VanillaCalendar !== 'undefined') {
-    const dateToUse = initialDate || getTodayISO();
+    const savedDate = getCookie('selectedDate');
+    const dateToUse = initialDate || savedDate || getTodayISO();
     const dateObj = new Date(dateToUse);
 
     const options = {
@@ -154,6 +160,8 @@ function initCalendar(initialDate = null) {
           if (self.selectedDates && self.selectedDates.length > 0) {
             selectedDate = self.selectedDates[0];
             console.log('Выбрана дата:', selectedDate);
+
+            setCookie('selectedDate', selectedDate);
 
             const dateBtnText = document.getElementById('date-btn-text');
             dateBtnText.textContent = formatDate(selectedDate);
@@ -404,7 +412,8 @@ function positionModal(modalId, buttonElement) {
     loadDataFromServer();
 
     if (!calendar) {
-      initCalendar();
+      const savedDate = getCookie('selectedDate');
+      initCalendar(savedDate);
     }
   }
 
@@ -504,6 +513,8 @@ function positionModal(modalId, buttonElement) {
 
     currentRouteColor = selectedColor;
 
+    setCookie('routeColor', selectedColor);
+
     routeColorCircle.style.background = selectedColor;
 
     if (isRouteVisible && selectedDate) {
@@ -523,6 +534,8 @@ function positionModal(modalId, buttonElement) {
     console.log('Сброс на дату:', todayISO);
 
     selectedDate = todayISO;
+
+    setCookie('selectedDate', todayISO);
 
     initCalendar(todayISO);
 
