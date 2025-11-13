@@ -200,7 +200,7 @@ html, body {
 
 .button-group {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   gap: 12px;
 }
@@ -226,6 +226,7 @@ html, body {
   gap: 8px;
 }
 
+.date-select-btn.active,
 .toggle-route-btn.active {
   background: #5cb85c;
   box-shadow: 0 2px 8px rgba(92, 184, 92, 0.35);
@@ -277,26 +278,42 @@ html, body {
   color: #333;
 }
 
-/* Календарь */
-.calendar-section {
+.calendar-modal {
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
   display: flex;
+  visibility: hidden;
   align-items: center;
-  flex-direction: column;
-  max-height: 1000px;
-  margin-top: 24px;
-  padding-top: 24px;
-  transition: opacity 0.3s ease, max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
-  opacity: 1;
-  border-top: 1px solid #f0f0f0;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: none;
+  opacity: 0;
 }
 
-.calendar-section.hidden {
-  overflow: hidden;
-  max-height: 0;
-  margin: 0;
-  padding: 0;
+.calendar-modal.show {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.calendar-modal-content {
+  position: fixed;
+  padding: 20px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  transform: translateY(20px);
   opacity: 0;
-  border: none;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+}
+
+.calendar-modal.show .calendar-modal-content {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .calendar-header {
@@ -315,13 +332,9 @@ html, body {
   color: #333;
 }
 
-/* Кастомизация vanilla-calendar */
 .vanilla-calendar {
   border: 1px solid #f0f0f0 !important;
   border-radius: 12px !important;
-}
-
-.vanilla-calendar-header__content {
 }
 
 .vanilla-calendar-day__btn_selected {
@@ -345,7 +358,19 @@ html, body {
   background: #4A90E2 !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 768px) {
+  .calendar-modal {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .calendar-modal-content {
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    margin: 0 20px;
+  }
+
   .info-table .label {
     font-size: 13px;
     font-weight: 400;
@@ -356,11 +381,6 @@ html, body {
   .info-table .value {
     font-size: 13px;
     padding-left: 0;
-  }
-
-  .calendar-section {
-    margin-top: 20px;
-    padding-top: 20px;
   }
 
   .calendar-header h4 {
@@ -402,6 +422,7 @@ html, body {
     box-shadow: 0 4px 12px rgba(74, 144, 226, 0.35);
   }
 
+  .date-select-btn.active:hover,
   .toggle-route-btn.active:hover {
     background: #4cae4c;
     box-shadow: 0 4px 12px rgba(92, 184, 92, 0.45);

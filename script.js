@@ -105,11 +105,14 @@ function initCalendar(initialDate = null) {
             const dateBtnText = document.getElementById('date-btn-text');
             dateBtnText.textContent = formatDate(selectedDate);
 
-            const calendarSection = document.getElementById('calendar-section');
-            calendarSection.classList.add('hidden');
+            self.settings.selected.dates = [selectedDate];
+            self.update();
 
-            const sidebarContent = document.querySelector('.sidebar-content');
-            sidebarContent.scrollTo({ top: 0, behavior: 'smooth' });
+            const calendarModal = document.getElementById('calendar-modal');
+            calendarModal.classList.remove('show');
+
+            const dateSelectBtn = document.getElementById('date-select-btn');
+            dateSelectBtn.classList.remove('active');
 
             if (isRouteVisible) {
               loadRouteForDate(selectedDate);
@@ -135,6 +138,33 @@ function initCalendar(initialDate = null) {
     }
   } else {
     setTimeout(() => initCalendar(initialDate), 100);
+  }
+}
+
+function positionCalendarModal() {
+  const calendarModal = document.getElementById('calendar-modal');
+  const calendarContent = calendarModal.querySelector('.calendar-modal-content');
+  const dateSelectBtn = document.getElementById('date-select-btn');
+  if (!calendarModal || !calendarContent || !dateSelectBtn) return;
+
+  const isMobile = window.innerWidth <= 768 || window.innerHeight <= 768;
+
+  if (isMobile) {
+    calendarContent.style.left = '';
+    calendarContent.style.bottom = '';
+  } else {
+    const btnRect = dateSelectBtn.getBoundingClientRect();
+
+    setTimeout(() => {
+      const modalWidth = calendarContent.offsetWidth;
+      const btnCenterX = btnRect.left + btnRect.width / 2;
+      let left = btnCenterX - modalWidth / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - modalWidth - 8));
+      calendarContent.style.left = `${left}px`;
+
+      const bottom = window.innerHeight - btnRect.top + 12;
+      calendarContent.style.bottom = `${bottom}px`;
+    }, 0);
   }
 }
 
@@ -186,8 +216,7 @@ function initCalendar(initialDate = null) {
   const findCarBtn = document.getElementById('find-car-btn');
   const dateSelectBtn = document.getElementById('date-select-btn');
   const toggleRouteBtn = document.getElementById('toggle-route-btn');
-  const calendarSection = document.getElementById('calendar-section');
-  const sidebarContent = document.querySelector('.sidebar-content');
+  const calendarModal = document.getElementById('calendar-modal');
   const resizeHandle = document.getElementById('resize-handle');
   const resetDateBtn = document.getElementById('reset-date-btn');
 
@@ -265,12 +294,10 @@ function initCalendar(initialDate = null) {
         },
         style: {
           stroke: [
-            // Тень для объёма
             {
               color: '#00000030',
               width: 6
             },
-            // Основная линия
             {
               color: '#4A90E2',
               width: 4
@@ -334,7 +361,8 @@ function initCalendar(initialDate = null) {
     sidebar.classList.remove('open');
     sidebarTrigger.classList.remove('hidden');
     markerCircle.classList.remove('active');
-    calendarSection.classList.add('hidden');
+    calendarModal.classList.remove('show');
+    dateSelectBtn.classList.remove('active');
   }
 
   markerElement.addEventListener('click', (e) => {
@@ -375,25 +403,15 @@ function initCalendar(initialDate = null) {
   };
 
   dateSelectBtn.onclick = () => {
-    const isHidden = calendarSection.classList.contains('hidden');
-
-    if (isHidden) {
-      calendarSection.classList.remove('hidden');
-
-      setTimeout(() => {
-        const scrollToBottom = () => {
-          sidebarContent.scrollTo({
-            top: sidebarContent.scrollHeight + 1000,
-            behavior: 'smooth'
-          });
-        };
-
-        scrollToBottom();
-
-        setTimeout(scrollToBottom, 200);
-      }, 150);
+    const calendarModal = document.getElementById('calendar-modal');
+    const isVisible = calendarModal.classList.contains('show');
+    if (!isVisible) {
+      calendarModal.classList.add('show');
+      dateSelectBtn.classList.add('active');
+      positionCalendarModal();
     } else {
-      calendarSection.classList.add('hidden');
+      calendarModal.classList.remove('show');
+      dateSelectBtn.classList.remove('active');
     }
   };
 
@@ -432,6 +450,19 @@ function initCalendar(initialDate = null) {
     }
 
     console.log('Дата успешно сброшена на текущий день');
+  });
+
+  calendarModal.addEventListener('click', (e) => {
+    if (e.target === calendarModal) {
+      calendarModal.classList.remove('show');
+      dateSelectBtn.classList.remove('active');
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (calendarModal.classList.contains('show')) {
+      positionCalendarModal();
+    }
   });
 
   function updateMarkerStatus(status) {
